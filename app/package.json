@@ -1,0 +1,87 @@
+{
+  "name": "gsoc2019-text-extraction",
+  "version": "0.2.0",
+  "private": true,
+  "dependencies": {
+    "@material-ui/core": "^4.11.0",
+    "@material-ui/icons": "^4.9.1",
+    "clsx": "^1.1.1",
+    "electron-is-dev": "^1.2.0",
+    "electron-settings": "^3.2.0",
+    "file-system": "^2.2.2",
+    "leveldown": "^5.6.0",
+    "linvodb3": "^3.26.0",
+    "mongoose": "^5.9.22",
+    "prop-types": "^15.7.2",
+    "react": "^16.13.1",
+    "react-dom": "^16.13.1",
+    "react-router-dom": "^5.2.0",
+    "react-tabs": "^3.1.1",
+    "react-virtualized": "^9.21.2"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.10.4",
+    "@babel/plugin-proposal-class-properties": "^7.10.4",
+    "@babel/plugin-proposal-decorators": "^7.10.4",
+    "@babel/plugin-proposal-object-rest-spread": "^7.10.4",
+    "@babel/preset-env": "^7.10.4",
+    "@babel/preset-react": "^7.10.4",
+    "babel-loader": "^8.1.0",
+    "babel-plugin-module-resolver": "^4.0.0",
+    "concurrently": "^5.2.0",
+    "cross-env": "^7.0.2",
+    "css-loader": "^3.6.0",
+    "electron": "^9.1.0",
+    "electron-builder": "^22.7.0",
+    "eslint-plugin-react-hooks": "^4.0.6",
+    "file-loader": "^6.0.0",
+    "prettier": "^2.0.5",
+    "react-scripts": "3.4.1",
+    "url-loader": "^4.1.0",
+    "wait-on": "^5.0.1",
+    "webpack": "^4.42.0",
+    "webpack-cli": "^3.3.12",
+    "webpack-node-externals": "^1.7.2"
+  },
+  "build": {
+    "appId": "text-extraction",
+    "extraResources": "scripts/*",
+    "files": [
+      "build/**/*",
+      "node_modules/**/*",
+      "resources/**/*"
+    ],
+    "directories": {
+      "buildResources": "assets"
+    }
+  },
+  "homepage": "./",
+  "main": "build/bundle.js",
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "npm run lint && npm run pretty && react-scripts build && npm run build:vsdev",
+    "build:dev": "npm run webpack -- --env.mode development --watch",
+    "build:vsdev": "npm run webpack -- --env.mode development",
+    "test": "react-scripts test --env=jsdom",
+    "webpack": "webpack",
+    "lint": "eslint src/ --ext js",
+    "pretty": "prettier --write \"./*{src,tests}/**/*.{ts,js}\"",
+    "eject": "react-scripts eject",
+    "electron-dev": "concurrently \"cross-env BROWSER=none npm start\" \"wait-on http://localhost:3000 && electron .\"",
+    "package-win": "electron-packager . --overwrite --asar=true --platform=win32 --arch=ia32 --icon=src/assets/icons/win/icon.ico --prune=true --out=release-builds --version-string.CompanyName=CE --version-string.FileDescription=CE --version-string.ProductName='text-extraction'",
+    "electron-pack": "electron-builder",
+    "preelectron-pack": "npm run build"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  }
+}

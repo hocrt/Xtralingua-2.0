@@ -11,6 +11,7 @@ import fs from 'fs'
 import Schemas from '@xlng/resources'
 import LinvoDB from 'linvodb3'
 import _ from 'lodash'
+import path from 'path'
 LinvoDB.dbPath = `${process.cwd()}/db`
 
 class XtralinguaApp {
@@ -134,7 +135,12 @@ function setHandlers(app) {
   ipcMain.on('add-results', (event, parameters) => {
     // Read data from certain json file
     fs.readFile(
-      `temp\\results_${parameters.resultType}.json`,
+      isDev
+        ? `/temp/results_${parameters.resultType}.json`
+        : path.join(
+            __dirname,
+            `../../../temp/results_${parameters.resultType}.json`
+          ),
       'utf8',
       (err, jsonString) => {
         if (err) {

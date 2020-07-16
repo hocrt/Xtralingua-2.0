@@ -1,0 +1,52 @@
+{
+  "name": "gsoc2019-text-extraction",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "@material-ui/core": "^4.1.1",
+    "@material-ui/icons": "^4.2.0",
+    "clsx": "^1.0.4",
+    "electron-is-dev": "^1.1.0",
+    "electron-settings": "^3.2.0",
+    "file-system": "^2.2.2",
+    "mongoose": "^5.5.14",
+    "prop-types": "^15.7.2",
+    "react": "^16.8.6",
+    "react-dom": "^16.8.6",
+    "react-router-dom": "^5.0.0",
+    "react-tabs": "^3.0.0",
+    "react-virtualized": "^9.21.1"
+  },
+  "devDependencies": {
+    "concurrently": "^4.1.0",
+    "cross-env": "^5.2.0",
+    "electron": "^5.0.2",
+    "electron-builder": "^21.2.0",
+    "react-scripts": "0.9.5",
+    "wait-on": "^3.2.0"
+  },
+  "build": {
+    "appId": "text-extraction",
+    "extraResources": "scripts/*",
+    "files": [
+      "build/**/*",
+      "node_modules/**/*",
+      "resources/**/*"
+    ],
+    "directories": {
+      "buildResources": "assets"
+    }
+  },
+  "homepage": "./",
+  "main": "public/electron.js",
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test --env=jsdom",
+    "eject": "react-scripts eject",
+    "electron-dev": "concurrently \"cross-env BROWSER=none npm start\" \"wait-on http://localhost:3000 && electron .\"",
+    "package-win": "electron-packager . --overwrite --asar=true --platform=win32 --arch=ia32 --icon=src/assets/icons/win/icon.ico --prune=true --out=release-builds --version-string.CompanyName=CE --version-string.FileDescription=CE --version-string.ProductName='text-extraction'",
+    "electron-pack": "electron-builder",
+    "preelectron-pack": "npm run build"
+  }
+}

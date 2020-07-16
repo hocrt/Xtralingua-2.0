@@ -369,6 +369,16 @@ function setHandlers(app) {
   ipcMain.on('get-indices', (event) => {
     app.Indices.find({}, (error, result) => {
       // Send found indices through main - renderer channel
+      result.sort((el1, el2) => {
+        if (el1.indexType < el2.indexType) {
+          return -1
+        }
+        if (el1.indexType > el2.indexType) {
+          return 1
+        }
+        return 0
+      })
+      console.log(result)
       event.reply('receive-indices', result)
     })
   })

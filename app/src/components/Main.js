@@ -209,7 +209,6 @@ class Main extends Component {
     // if the application is executed for the first time or the two paths are
     // invalid, open settings
     if (
-      this.state.settings.get('firstTime') === false &&
       this.state.fs.existsSync(
         `${this.state.settings.get('rPath')}\\Rscript.exe`
       ) &&
@@ -501,12 +500,7 @@ class Main extends Component {
           open={this.state.openSettings}
           onClose={this.handleClose}
         >
-          {this.state.settings.get('firstTime') && (
-            <DialogTitle>Fill the two fields with correct paths</DialogTitle>
-          )}
-          {!this.state.settings.get('firstTime') && (
-            <DialogTitle>Correct the invalid paths</DialogTitle>
-          )}
+          <DialogTitle>Fill the two fields with correct paths</DialogTitle>
           <DialogContent>
             <form className={classes.container}>
               <Button

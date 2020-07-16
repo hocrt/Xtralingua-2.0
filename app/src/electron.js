@@ -15,8 +15,6 @@ LinvoDB.dbPath = `${process.cwd()}/db`
 
 class XtralinguaApp {
   constructor() {
-    this.firstTime
-
     // Keep a global reference of the window objects, if you don't, the windows will
     // be closed automatically when the JavaScript object is garbage collected.
     this.mainWindow
@@ -27,21 +25,22 @@ class XtralinguaApp {
     console.log('Connection successful')
     this.initalizeModels()
     this.createMainWindow(paramObj)
-    if (this.firstTime) {
-      await new Promise((resolve, _reject) => {
-        fs.readFile(
-          `${__dirname}/../src/resources/indices/indices.json`,
-          'utf8',
-          (err, jsonString) => {
-            if (err) {
-              console.log('File read failed:', err)
-              return
-            }
-            this.Indices.insert(JSON.parse(jsonString), resolve)
+    await new Promise((resolve, _reject) => {
+      this.Indices.remove({}, { multi: true }, resolve)
+    })
+    await new Promise((resolve, _reject) => {
+      fs.readFile(
+        `${__dirname}/../src/resources/indices/indices.json`,
+        'utf8',
+        (err, jsonString) => {
+          if (err) {
+            console.log('File read failed:', err)
+            return
           }
-        )
-      })
-    }
+          this.Indices.insert(JSON.parse(jsonString), resolve)
+        }
+      )
+    })
   }
 
   createMainWindow(paramObj) {
@@ -427,9 +426,6 @@ app.on('ready', async () => {
 app.on('window-all-closed', () => {
   // On macOS it is common for applications and their menu bar
   // to stay active until the user quits explicitly with Cmd + Q
-  if (settings.get('firstTime')) {
-    settings.set('firstTime', false)
-  }
   if (process.platform !== 'darwin') app.quit()
 })
 

@@ -1,5 +1,5 @@
 {
-  "name": "gsoc2019-text-extraction",
+  "name": "xtralingua",
   "version": "0.2.0",
   "private": true,
   "dependencies": {
@@ -11,7 +11,7 @@
     "file-system": "^2.2.2",
     "leveldown": "^5.6.0",
     "linvodb3": "^3.26.0",
-    "mongoose": "^5.9.22",
+    "lodash": "^4.17.19",
     "prop-types": "^15.7.2",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
@@ -44,23 +44,24 @@
     "webpack-node-externals": "^1.7.2"
   },
   "build": {
-    "appId": "text-extraction",
+    "appId": "xtralingua",
     "extraResources": "scripts/*",
     "files": [
       "build/**/*",
       "node_modules/**/*",
-      "resources/**/*"
+      "src/resources/**/*"
     ],
     "directories": {
-      "buildResources": "assets"
+      "buildResources": "src/assets"
     }
   },
   "homepage": "./",
-  "main": "build/bundle.js",
+  "main": "build/electron.js",
   "scripts": {
     "start": "react-scripts start",
-    "build": "npm run lint && npm run pretty && react-scripts build && npm run build:vsdev",
+    "build": "npm run lint && npm run pretty && react-scripts build && npm run build:prod",
     "build:dev": "npm run webpack -- --env.mode development --watch",
+    "build:prod": "npm run webpack -- --env.mode production --progress --colors",
     "build:vsdev": "npm run webpack -- --env.mode development",
     "test": "react-scripts test --env=jsdom",
     "webpack": "webpack",
@@ -68,6 +69,7 @@
     "pretty": "prettier --write \"./*{src,tests}/**/*.{ts,js}\"",
     "eject": "react-scripts eject",
     "electron-dev": "concurrently \"cross-env BROWSER=none npm start\" \"wait-on http://localhost:3000 && electron .\"",
+    "electron": "electron .",
     "package-win": "electron-packager . --overwrite --asar=true --platform=win32 --arch=ia32 --icon=src/assets/icons/win/icon.ico --prune=true --out=release-builds --version-string.CompanyName=CE --version-string.FileDescription=CE --version-string.ProductName='text-extraction'",
     "electron-pack": "electron-builder",
     "preelectron-pack": "npm run build"

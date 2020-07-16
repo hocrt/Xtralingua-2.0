@@ -1,15 +1,22 @@
 const nodeExternals = require('webpack-node-externals')
 
 module.exports = ({ mode }) => {
+
+  const isEnvProduction = mode === 'production'
+
   return {
     mode,
+    bail: isEnvProduction,
     target: 'electron-renderer',
     entry: './src/electron.js',
     externals: [nodeExternals()],
     output: {
       path: __dirname + '/build',
       publicPath: 'build/',
-      filename: 'bundle.js'
+      filename: 'electron.js'
+    },
+    node: {
+      __dirname: false
     },
     module: {
       rules: [

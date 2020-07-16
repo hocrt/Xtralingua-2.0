@@ -256,7 +256,8 @@ class ResultsTab extends Component {
         filters: [filter],
       })
       .then((retObj) => {
-        if (retObj.filePath !== undefined) {
+        let filePath = retObj.filePath
+        if (filePath !== undefined) {
           let exportString
           let exportTitles
           let exportData
@@ -284,7 +285,7 @@ class ResultsTab extends Component {
               exportString = JSON.stringify(exportData)
               break
           }
-          this.props.fs.writeFileSync(retObj.filePath, exportString)
+          this.props.fs.writeFileSync(filePath, exportString)
         }
       })
   }

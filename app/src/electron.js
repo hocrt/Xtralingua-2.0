@@ -1,4 +1,3 @@
-import path from 'path'
 // Module to control application life (app)
 // Module to create browser's windows (BrowserWindow)
 // Module to modify the menu bar and (Menu)
@@ -8,11 +7,11 @@ import { app, BrowserWindow, Menu, ipcMain } from 'electron'
 import isDev from 'electron-is-dev'
 import settings, { set } from 'electron-settings'
 // Package to connect to database
-import * as mongoose from 'mongoose'
 import fs from 'fs'
-import Schemas from './resources'
+import Schemas from '@xlng/resources'
 import LinvoDB from 'linvodb3'
-import { inspect } from 'util'
+import _ from 'lodash'
+LinvoDB.dbPath = `${process.cwd()}/db`
 
 class XtralinguaApp {
   constructor() {
@@ -25,27 +24,23 @@ class XtralinguaApp {
   }
 
   async init(paramObj) {
-    this.firstTime = settings.get('firstTime', true)
-    console.log(this.firstTime)
-    let connection = await this.connectToDatabase()
-    if (!connection) {
-      throw new Error("Couldn't connect to database")
-    }
     console.log('Connection successful')
     this.initalizeModels()
     this.createMainWindow(paramObj)
     if (this.firstTime) {
-      fs.readFile(
-        'src/resources/indices/indices.json',
-        'utf8',
-        (err, jsonString) => {
-          if (err) {
-            console.log('File read failed:', err)
-            return
+      await new Promise((resolve, _reject) => {
+        fs.readFile(
+          `${__dirname}/../src/resources/indices/indices.json`,
+          'utf8',
+          (err, jsonString) => {
+            if (err) {
+              console.log('File read failed:', err)
+              return
+            }
+            this.Indices.insert(JSON.parse(jsonString), resolve)
           }
-          this.Indices.insertMany(JSON.parse(jsonString))
-        }
-      )
+        )
+      })
     }
   }
 
@@ -57,13 +52,13 @@ class XtralinguaApp {
           { type: 'separator' },
           {
             label: 'Settings',
-            click() {
+            click: () => {
               this.mainWindow.webContents.send('open-settings')
             },
           },
           {
             label: 'Toggle Dev Tools',
-            click() {
+            click: () => {
               this.mainWindow.webContents.toggleDevTools()
             },
             accelerator: 'CmdOrCtrl+Shift+I',
@@ -94,12 +89,11 @@ class XtralinguaApp {
         nodeIntegration: true,
       },
     })
-
     // and load the index.html of the app.
     this.mainWindow.loadURL(
       isDev
         ? 'http://localhost:3000/'
-        : `file://${path.join(__dirname, '../build/index.html')}`
+        : `file://${__dirname}/../build/index.html`
     )
     if (isDev) {
       // Open the DevTools.
@@ -127,32 +121,10 @@ class XtralinguaApp {
     })
   }
 
-  async connectToDatabase() {
-    try {
-      console.log('Connecting to the DB... ')
-
-      const connection = await mongoose.connect(
-        `mongodb://localhost:27017/text_extraction_db`,
-        {
-          useNewUrlParser: true,
-          useUnifiedTopology: true,
-          useFindAndModify: false,
-          useCreateIndex: true,
-        }
-      )
-
-      console.log('Connections established: ' + connection)
-
-      return connection
-    } catch (error) {
-      throw Error(`Unable to connect to DB :: ${error}`)
-    }
-  }
-
   initalizeModels() {
-    this.Corpus = mongoose.model('corpus', Schemas.corpusSchema)
-    this.Indices = mongoose.model('indices', Schemas.indicesSchema)
-    this.Script = mongoose.model('script', Schemas.scriptSchema)
+    this.Corpus = new LinvoDB('corpus', Schemas.corpusSchema)
+    this.Indices = new LinvoDB('indices', Schemas.corpusSchema)
+    this.Script = new LinvoDB('script', Schemas.corpusSchema)
   }
 }
 
@@ -194,21 +166,22 @@ function setHandlers(app) {
             indices[`indices.${key}`] = data[key][index]
           })
 
-          return {
-            updateOne: {
-              filter: { path: filePath },
-              upsert: true,
-              update: {
-                $set: indices,
-              },
-            },
+          return new Promise((resolve, _reject) => {
+            app.Corpus.update(
+              { path: filePath },
+              { $set: indices },
+              { upsert: true },
+              (_err, numReplaced) => {
+                resolve(numReplaced)
+              }
+            )
+          })
+        })
+        Promise.all(operations).then((res) => {
+          event.returnValue = {
+            upsertedCount: res.reduce((a, b) => a + b, 0),
           }
         })
-        console.log(operations)
-        app.Corpus.bulkWrite(
-          operations,
-          (error, res) => (event.returnValue = res)
-        )
       }
     )
   })
@@ -219,57 +192,32 @@ function setHandlers(app) {
    */
   ipcMain.on('get-results', (event, parameters) => {
     let direction = parameters.order.asc ? 1 : -1
-    let projection = {
-      name: 1,
-      path: 1,
-      'indices.tokensNum': 1,
-      'indices.vocabularyNum': 1,
-      _id: 0,
-    }
+    let projectionArray = [
+      'name',
+      'path',
+      'indices.tokensNum',
+      'indices.vocabularyNum',
+    ]
     Object.keys(parameters.indices).forEach((indexType) =>
-      parameters.indices[indexType].map(
-        (indexName) =>
-          (projection[
-            `indices.${indexType}.${indexName.replace(/[.]/g, '_')}`
-          ] = [`$indices.${indexType}.${indexName.replace(/[.]/g, '_')}`])
-      )
-    )
-    app.Corpus.aggregate(
-      [
-        {
-          $match: {
-            path: {
-              $in: parameters.filePaths,
-            },
-          },
-        },
-        {
-          $project: projection,
-        },
-        {
-          $sort: {
-            [parameters.order.by]: direction,
-          },
-        },
-      ],
-      (e, result) => {
-        result.forEach((resultObj) =>
-          Object.keys(parameters.indices).forEach((indexType) =>
-            parameters.indices[indexType].forEach(
-              (indexName) =>
-                (resultObj['indices'][indexType][
-                  indexName.replace(/[.]/g, '_')
-                ] =
-                  resultObj['indices'][indexType][
-                    indexName.replace(/[.]/g, '_')
-                  ][0])
-            )
-          )
+      parameters.indices[indexType].map((indexName) => {
+        projectionArray.push(
+          `indices.${indexType}.${indexName.replace(/[.]/g, '_')}`
         )
-        // Send returned data through main - renderer channel
-        event.reply('receive-results', result)
-      }
+      })
     )
+
+    app.Corpus.find({
+      path: {
+        $in: parameters.filePaths,
+      },
+    })
+      .map((x) => _.pick(x, projectionArray))
+      .sort({
+        [parameters.order.by]: direction,
+      })
+      .exec((_err, docs) => {
+        event.reply('receive-results', docs)
+      })
   })
 
   /* Create a channel between main and rendered process
@@ -282,22 +230,11 @@ function setHandlers(app) {
       [`indices.${parameters.wordListType}`]: 1,
       _id: 0,
     }
-    app.Corpus.aggregate(
-      [
-        {
-          $match: {
-            path: parameters.filePath,
-          },
-        },
-        {
-          $project: projection,
-        },
-      ],
-      (e, result) => {
-        // Send returned data through main - renderer channel
+    app.Corpus.find({ path: parameters.filePath })
+      .map((x) => _.pick(x, ['name', `indices.${parameters.wordListType}`]))
+      .exec((err, result) => {
         event.returnValue = result
-      }
-    )
+      })
   })
 
   /* Create a channel between main and rendered process
@@ -311,40 +248,40 @@ function setHandlers(app) {
       size: 1,
       _id: 0,
     }
-    app.Corpus.aggregate(
-      [
-        {
-          $project: projection,
-        },
-        {
-          $sort: {
-            [parameters.order.by]: direction,
-          },
-        },
-      ],
-      (e, result) => {
-        // Send returned data through main - renderer channel
-        event.reply('receive-book', result)
-      }
-    )
+    app.Corpus.find({})
+      .map((doc) => ({
+        path: doc.path,
+        name: doc.name,
+        size: doc.size,
+      }))
+      .sort({
+        [parameters.order.by]: direction,
+      })
+      .exec((_err, docs) => {
+        event.reply('receive-book', docs)
+      })
   })
 
   /* Create a channel between main and rendered process
    * for custom script insertion.
    */
   ipcMain.on('add-script', (event, parameters) => {
-    app.Script.updateOne(
+    app.Script.update(
       { name: parameters.name },
       {
-        name: parameters.name,
-        env: parameters.env,
-        path: parameters.path,
-        args: parameters.args,
+        $set: {
+          name: parameters.name,
+          env: parameters.env,
+          path: parameters.path,
+          args: parameters.args,
+        },
       },
       {
         upsert: true,
       },
-      (error, res) => (event.returnValue = res)
+      (_err, res) => {
+        event.returnValue = res
+      }
     )
   })
 
@@ -352,7 +289,7 @@ function setHandlers(app) {
    * for custom script deletion.
    */
   ipcMain.on('delete-script', (event, parameters) => {
-    app.Script.deleteOne({ name: parameters.name }, (err) => {
+    app.Script.remove({ name: parameters.name }, {}, (err) => {
       if (err) throw new Error(err)
       event.returnValue = 'done'
     })
@@ -362,12 +299,8 @@ function setHandlers(app) {
    * to fetch custom scripts.
    */
   ipcMain.on('get-script', (event) => {
-    app.Script.find({}, (error, result) => {
-      // Send found indices through main - renderer channel
-      event.reply(
-        'receive-script',
-        result.map((obj) => obj.toObject({ versionKey: false }))
-      )
+    app.Script.find({}, (_err, result) => {
+      event.reply('receive-script', result)
     })
   })
 
@@ -387,17 +320,46 @@ function setHandlers(app) {
         },
       },
     }))
-    app.Corpus.bulkWrite(operations, (error, res) => {
-      console.log(typeof res)
-      event.returnValue = res
+
+    const newDocArray = parameters.filePaths.map((_path, idx) => ({
+      name: parameters.fileNames[idx],
+      path: parameters.filePaths[idx],
+      size: parameters.size[idx],
+      lastModified: parameters.lastModified[idx],
+    }))
+
+    Promise.all(
+      newDocArray.map(
+        (doc) =>
+          new Promise((resolve, reject) => {
+            console.log(doc)
+            app.Corpus.update(
+              { path: doc.path },
+              { $set: doc },
+              { upsert: true },
+              (_err, numReplaced) => {
+                resolve(numReplaced)
+              }
+            )
+          })
+      )
+    ).then((res) => {
+      app.Corpus.find({}, (e, docs) => {
+        console.log(docs)
+        event.returnValue = {
+          upsertedCount: res.reduce((a, b) => a + b, 0),
+        }
+      })
     })
   })
   /* Create a channel between main and rendered process
    * for book deletion.
    */
   ipcMain.on('delete-book', (event, parameters) => {
-    app.Corpus.deleteOne({ path: parameters.path }, (err) => {
-      if (err) throw new Error(err)
+    app.Corpus.remove({ path: parameters.path }, {}, (err) => {
+      if (err) {
+        throw new Error(err)
+      }
       event.returnValue = 'done'
     })
   })
@@ -408,10 +370,7 @@ function setHandlers(app) {
   ipcMain.on('get-indices', (event) => {
     app.Indices.find({}, (error, result) => {
       // Send found indices through main - renderer channel
-      event.reply(
-        'receive-indices',
-        result.map((doc) => doc.toObject({ versionKey: false }))
-      )
+      event.reply('receive-indices', result)
     })
   })
 }

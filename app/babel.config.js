@@ -8,7 +8,7 @@ module.exports = {
               resolves complex relative paths into absolutes i.e
               import '../../../../utils' -> import '@bpm/utils'
             */
-            "^@xlng/(.+)": "./app/src/\\1"
+            "^@xlng/(.+)": "./src/\\1"
           }
         }
       ]

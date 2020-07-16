@@ -262,7 +262,6 @@ class Main extends Component {
       newArgs[replaceIndex] = this.state.selectedFilesPaths
     }
     const { spawn } = window.require('child_process')
-    console.log(env, [scriptPath].concat(newArgs))
     const process = spawn(env, [scriptPath].concat(newArgs))
 
     process.on('error', (error) => {
@@ -474,10 +473,11 @@ class Main extends Component {
         properties: ['openDirectory'],
       })
       .then((retObj) => {
-        if (retObj.filePaths !== undefined) {
-          retObj.filePaths = retObj.filePaths[0]
-          this.state.settings.set(type, retObj.filePaths)
-          this.setState({ [type]: retObj.filePaths })
+        let filePaths = retObj.filePaths
+        if (filePaths !== undefined) {
+          filePaths = filePaths[0]
+          this.state.settings.set(type, filePaths)
+          this.setState({ [type]: filePaths })
         }
       })
   }

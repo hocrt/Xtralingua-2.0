@@ -6,9 +6,9 @@ import {
   Container,
   IconButton,
   Checkbox,
-  ExpansionPanel,
-  ExpansionPanelSummary,
-  ExpansionPanelDetails,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
   TextField,
   Input,
   DialogActions,
@@ -84,15 +84,24 @@ class CustomOptions extends Component {
           path: `${props.settings.get('python', '')}\\python`,
         },
       ],
-      scriptPath: {},
       scriptId: 0,
       displayData: {},
       open: false,
       name: '',
       env: '',
-      // scriptPath: '',
+      scriptPath: '',
       args: '',
     }
+    this.checkAll = this.checkAll.bind(this)
+    this.addScriptDialog = this.addScriptDialog.bind(this)
+    this.getScript = this.getScript.bind(this)
+    this.addScript = this.addScript.bind(this)
+    this.removeScript = this.removeScript.bind(this)
+    this.handleChange = this.handleChange.bind(this)
+    this.handleClickOpen = this.handleClickOpen.bind(this)
+    this.handleClose = this.handleClose.bind(this)
+    this.handleToggleAll = this.handleToggleAll.bind(this)
+    this.handleToggle = this.handleToggle.bind(this)
   }
 
   componentDidMount() {
@@ -120,25 +129,15 @@ class CustomOptions extends Component {
       })
       .then((retObj) => {
         let scriptName = ''
-        if (retObj.filePaths !== undefined) {
-          retObj.filePaths = retObj.filePaths[0]
-          this.setState({ filePaths: retObj.filePaths })
-          scriptName = retObj.filePaths.split('\\').slice(-1)[0]
-        }
-        if (!retObj.filePaths) {
+        let filePaths = retObj.filePaths
+        if (filePaths !== undefined) {
+          filePaths = filePaths[0]
+          this.setState({ scriptPath: filePaths })
+          scriptName = filePaths.split('\\').slice(-1)[0]
           document.querySelector(`#script-path`).value = scriptName
         }
       })
   }
-
-  // addScript = (e) => {
-  //   let [env, , , args] = e.target.parentNode.children;
-  //   const id = e.target.parentNode.getAttribute("id").split('-').slice(-1);
-  //   if (document.querySelector(`#add-script-${id}`).innerText === "add") this.spawnCustomOption();
-  //   this.props.setScriptParameters(false, `${this.props.type}${id}`, env.value, this.state.scriptPaths.id, args.value.split(' '));
-  //   document.querySelector(`#add-script-${id}`).innerText = "update";
-  //   document.querySelector(`#remove-script-${id}`).style.display = "inline"
-  // }
 
   getScript() {
     this.props.ipc.send('get-script')
@@ -270,8 +269,8 @@ class CustomOptions extends Component {
           {(() => {
             if (this.props.savedScripts.length !== 0) {
               return this.props.savedScripts.map((scriptObj, index) => (
-                <ExpansionPanel key={scriptObj.name}>
-                  <ExpansionPanelSummary
+                <Accordion key={scriptObj.name}>
+                  <AccordionSummary
                     expandIcon={<i className="material-icons">expand_more</i>}
                   >
                     <div>
@@ -318,13 +317,13 @@ class CustomOptions extends Component {
                         {scriptObj.name}
                       </Typography>
                     </div>
-                  </ExpansionPanelSummary>
-                  <ExpansionPanelDetails className={classes.expansionPanel}>
+                  </AccordionSummary>
+                  <AccordionDetails className={classes.expansionPanel}>
                     <Typography>Environment: {scriptObj.env}</Typography>
                     <Typography>Script: {scriptObj.path}</Typography>
                     <Typography>Arguments: {scriptObj.args}</Typography>
-                  </ExpansionPanelDetails>
-                </ExpansionPanel>
+                  </AccordionDetails>
+                </Accordion>
               ))
             }
           })()}

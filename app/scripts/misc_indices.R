@@ -40,8 +40,6 @@ for (k in 1:length(filePaths)) {
 
     features <- dfm(toks, stem=T, tolower=T)
     features <- dfm_select(features, pattern=".+\\..+", selection="remove", valuetype="regex")
-    print(features[1,])
-    print(typeof(features))
     TYPES_LIST <- featnames(features)
     TYPES <- length(TYPES_LIST)
     V <- length(TYPES_LIST)

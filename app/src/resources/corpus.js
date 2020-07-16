@@ -1,7 +1,4 @@
-const mongoose = require('mongoose')
-const Schema = mongoose.Schema
-
-const corpusSchema = new Schema({
+const corpusSchema = {
   name: String,
   path: {
     type: String,
@@ -18,6 +15,6 @@ const corpusSchema = new Schema({
     vocabulary: Array,
     vocabularyNum: Array,
   },
-})
+}
 
 export default corpusSchema

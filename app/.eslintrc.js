@@ -21,10 +21,15 @@ module.exports = {
         'react'
     ],
     'rules': {
-      "class-methods-use-this": 0,
-      "no-unused-vars": 0,
-      "no-invalid-this": 0,
-      "import/no-nodejs-modules": 0,
-      "import/no-namespace": 0
+        "no-const-assign": "warn",
+        "no-this-before-super": "warn",
+        "no-undef": "warn",
+        "no-unreachable": "warn",
+        "no-unused-vars": "warn",
+        "constructor-super": "warn",
+        "valid-typeof": "warn",
+        "class-methods-use-this": "warn",
+        "no-unused-vars": "warn",
+        "no-invalid-this": "warn",
     }
 }

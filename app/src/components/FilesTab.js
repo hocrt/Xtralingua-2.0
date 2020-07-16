@@ -12,7 +12,7 @@ import {
   Paper,
   Container,
 } from '@material-ui/core'
-
+import _ from 'lodash'
 const styles = (theme) => ({
   root: {
     width: '100%',
@@ -80,30 +80,31 @@ class FilesTab extends Component {
           },
         ],
       })
-      .then(async (retObj) => {
-        if (retObj.filePaths !== undefined) {
-          let fileNames = retObj.filePaths.map((path) => {
+      .then((retObj) => {
+        let filePaths = retObj.filePaths
+        if (filePaths !== undefined) {
+          let fileNames = filePaths.map((path) => {
             return `${path.split('\\').slice(-1)[0]}`
           })
           let newChecked = [...this.props.selectedFilesPaths]
           newChecked.forEach((filePath) => {
-            const index = retObj.filePaths.indexOf(filePath)
+            const index = filePaths.indexOf(filePath)
             if (index !== -1) {
-              retObj.filePaths.splice(index, 1)
-              fileNames.splice(index, 1)
+              _.pullAt(filePaths, index)
+              _.pullAt(fileNames, index)
             }
           })
-          newChecked = newChecked.concat(retObj.filePaths)
+          newChecked = _.union(newChecked, filePaths)
           this.props.setDistantState({ selectedFilesPaths: newChecked })
 
           let res = []
-          retObj.filePaths.forEach((filePath, index) =>
+          filePaths.forEach((filePath, index) => {
             res.push(this.props.fs.statSync(filePath, { encoding: 'utf8' }))
-          )
+          })
 
           // Send sync message in order to avoid sync errors when fetching books
           const insertResults = this.props.ipc.sendSync('add-book', {
-            filePaths: retObj.filePaths,
+            filePaths,
             fileNames: fileNames,
             size: res.map((resObj) => resObj.size),
             lastModified: res.map((resObj) => resObj.mtimeMs),

@@ -151,7 +151,6 @@ function setHandlers(app) {
         const operations = filePaths.map((filePath, index) => {
           let indices = {}
           // Replace '.' with '_' in index names in order to avoid problem with
-          // MongoDB indices retrieval
           Object.keys(data).forEach((key) => {
             // Check for indices that store objects (readability, lexdiv, misc etc)
             if (data[key][index].length === undefined) {

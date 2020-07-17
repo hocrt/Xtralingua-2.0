@@ -75,14 +75,14 @@ class CustomOptions extends Component {
           displayName: 'Rscript',
           path: `${props.settings.get('rPath', '')}\\Rscript`,
         },
-        {
-          displayName: 'python3',
-          path: `${props.settings.get('python3Path', '')}\\python3`,
-        },
-        {
-          displayName: 'python',
-          path: `${props.settings.get('python', '')}\\python`,
-        },
+        // {
+        //   displayName: 'python3',
+        //   path: `${props.settings.get('python3Path', '')}\\python3`,
+        // },
+        // {
+        //   displayName: 'python',
+        //   path: `${props.settings.get('python', '')}\\python`,
+        // },
       ],
       scriptId: 0,
       displayData: {},

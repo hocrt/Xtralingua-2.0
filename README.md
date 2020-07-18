@@ -5,12 +5,11 @@ Text analysis is a fascinating field that attracts people from many scientific f
 The goal of the project is to build a desktop GUI, that provides its users with an easy way to extract quantitative text profiles from multilingual texts. The text analysis will come from scripts that combine many existing NLP packages, written in R. The tool is going to be modular and open source, in order to be easily accessible and adaptable to everyone's needs. The project is going to boost and facilitate scientific research in NLP fields, as it will make text analysis available to people with little to none computer science knowledge, such as linguistics students.
 
 ## Execution
-To download the installer, please visit [this](https://github.com/hocrt/Xtralingua-2.0/releases/tag/v0.2.0) and download "xtralingua.Setup.0.2.0.exe" under assets. Since this project is still in
-pre-release phase, maybe windows and antivirus won't recognise it as a valid application.
+To download the installer, visit [this](https://github.com/hocrt/Xtralingua-2.0/releases/tag/v0.2.0) and download "xtralingua.Setup.0.2.0.exe" under assets. Since this project is still in pre-release phase, windows and antivirus software might not recognise it as a valid application.
 
-To install the application just double click the installer. The app will run right away.
-During the first execution, you need to provide R's bin directory and a folder where R's packages are to be downloaded (we suggest using a new folder).
-After that, the required files are going to be downloaded. Since the total size is ~500MB, be aware that this step may take awhile...
+To install the application double click the installer. The app will initialize right away.
+During first execution, you will need to provide the R's bin directory and a folder where R's packages are to be downloaded (we suggest using a new folder).
+After that, the required dependencies are going to be downloaded. Since total size is ~500MB, be aware that this step may take a while.
 
 ## Contributors
  * Leventis Sotiris ([sotirisleventis](https://github.com/sotirisleventis))

@@ -12,8 +12,9 @@ During first execution, you will need to provide the R's bin directory and a fol
 After that, the required dependencies are going to be downloaded. Total size is ~500MB, so be aware that this step may take a while. 
 
 ## Contributors
- * Sotiris Leventis ([sotirisleventis](https://github.com/sotirisleventis))
- * George Mikros ([gmikros](https://github.com/gmikros))
- * Fotis Fitsilis ([fitsilisf](https://github.com/fitsilisf))
  * Panagiotis Papantonakis ([PanagiotisP](https://github.com/PanagiotisP))
+ * George Mikros ([gmikros](https://github.com/gmikros))
+ * Sotiris Leventis ([sotirisleventis](https://github.com/sotirisleventis))
+ * Fotis Fitsilis ([fitsilisf](https://github.com/fitsilisf))
+ 
   

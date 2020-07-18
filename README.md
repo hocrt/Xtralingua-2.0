@@ -1,4 +1,4 @@
-# Xtralingua-2.0
+# Xtralingua-2.0 / DH2020 version
 ## About the project
 Text analysis is a fascinating field that attracts people from several, often distant, scientific fields. As of today, text analysis is executed through powerful scripts scattered in many packages and libraries of different programming languages, each of which contains only a subset of available linguistic features and requires high technical knowledge to be operated. As a result, it is difficult to obtain a unified result with all desired features. Hence, many scientists, particularly those who lack a computer science background, are excluded from using them.
 
